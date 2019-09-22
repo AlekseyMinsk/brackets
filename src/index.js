@@ -1,52 +1,73 @@
-module.exports = function check(str, bracketsConfig) {
-  let stack = [];
-  let closeError = [];
-  let open = bracketsConfig.map(item => {
-    return item[0];
-  });
-  let close = bracketsConfig.map(item => {
-    return item[1];
-  });
+module.exports = function check(str, pattern) {
 
-  for(let i = 0; i < str.length; i++) {
-	let currentItem = str[i];
-  	if(open.includes(currentItem) || close.includes(currentItem)) {
+  var arr = str.split("");
+  var arrLength = arr.length;
+  var stack = [];
+  var openNumberInPattern = 0;
+  var closeNumberInPattern = 1;
 
-  		// если первый элемент в стеке закрывающияся скобка, сразу return false
-  		let isStackEmpty = !stack[0];
-  	 	if(isStackEmpty && close.includes(currentItem) && !open.includes(currentItem)) {
-  			return false;
-  		} else if(isStackEmpty) {
-  			stack.push(currentItem);
-  		} else if(open.indexOf(currentItem) + 1 && !(close.indexOf(currentItem) + 1)) {
-  			stack.push(currentItem);
-  		} else if(open.indexOf(stack[stack.length - 1]) === close.indexOf(currentItem)) {
-  			stack.splice(stack.length - 1, 1);
-  		} else  {
-  			return false;
-  		}
-
-  	
-  	}
+  var checkOpen = function(item, number) {
+    var flag = false;
+    pattern.forEach(itemPattert =>{
+      if(itemPattert[number] === item) {
+        flag = true;
+      }
+    })
+    return flag;
   }
-  return stack.length ? false : true;
+
+  var patternNumberFunction = function(item) {
+    var number;
+    pattern.forEach((itemPattert, i) =>{  
+      if(itemPattert.indexOf(item) + 1){
+        number =  i;
+      }
+    })
+    return number;
+  }
+
+
+  for(var i = 0; i < arrLength; i++) {
+  
+    var isOpen = checkOpen(arr[i], openNumberInPattern);
+    var isClose = checkOpen(arr[i], closeNumberInPattern);
+
+
+    if (!stack.length && isClose && !isOpen) {
+      return false;
+    } else if (!stack.length || (isOpen && !isClose)) {
+      stack.push(arr[i]);
+      continue;
+    } else {
+      if (isOpen && isClose) {
+        if (!(stack.indexOf(arr[i]) + 1)) {
+          stack.push(arr[i]);
+          continue;
+        }
+        if (stack[stack.length - 1] !== arr[i]) {
+          return false;
+        } else {
+          stack.pop();
+          continue;
+        }
+      }
+
+      var patternNumberPrev = patternNumberFunction(stack[stack.length - 1]);
+      var patternNumberCurrent = patternNumberFunction(arr[i]);
+
+      if(patternNumberPrev === patternNumberCurrent) {
+        stack.pop();
+        continue;
+      }
+
+
+    }
+
+ }
+
+  if(stack.length) {
+    return false;
+  } else {
+    return true;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
